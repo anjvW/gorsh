@@ -53,8 +53,8 @@ func handleConnection(conn net.Conn) {
 	}
 	defer term.Restore(int(os.Stdin.Fd()), oldState) // 恢复终端状态
 
-	// 启动一个新的bash会话
-	_, err = conn.Write([]byte("python -c 'import pty; pty.spawn(\"/bin/bash\")'\n"))
+	// 启动一个新的bash会话，使用script获得pty
+	_, err = conn.Write([]byte("script -q -c '/bin/bash' /dev/null\n"))
 	if err != nil {
 		fmt.Println("错误:", err)
 		os.Exit(1)
