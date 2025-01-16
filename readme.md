@@ -12,7 +12,10 @@
 
 ## 安装
 
-确保您已经安装了 Go 语言环境。然后，您可以克隆该项目，运行，或下载release版本。
+在windows上运行此项目，测试在cmd和powershell上都不能正常运行。
+windows Terminal和tabby可以正常运行。
+确保您已经安装了 Go 语言环境。然后，您可以克隆该项目，编译运行。
+或下载release版本。
 
 ## 使用
 

